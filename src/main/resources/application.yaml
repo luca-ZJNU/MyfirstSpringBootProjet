@@ -1,0 +1,8 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    data-username: localhost
+    url: jdbc:mysql://localhost:3306/single_node_pro?characterEncoding=utf8&&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+    password: 2780492.wzy

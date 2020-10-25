@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>办公无纸化系统</title>
+
+    <!-- 最新的 Bootstrap 核心 css 文件 -->
+    <!-- 在url上 使用 @标签 可以帮我们 自动加上 contextpath -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script th:src="@{/js/common/jquery-3.4.1.min.js}" ></script>
+    <script th:src="@{/js/bootstrap.min.js}" ></script>
+
+</head>
+<body>
+
+<!--  导航栏开始  			 ↓ -->
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/index">首页</a>
+        </div>
+
+
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+
+
+            <ul class="nav navbar-nav">
+                <li class=""><a href="#">公文流转</a></li>
+
+                <li class="dropdown active">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        人员管理 <span class="caret"></span>
+                    </a>
+
+                    <ul class="dropdown-menu">
+                        <li class="active"><a href="/account/list">用户列表</a></li>
+                    </ul>
+
+
+                </li>
+            </ul>
+
+
+
+
+            <form class="navbar-form navbar-left">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="请输入员工姓名或工号">
+                </div>
+                <button type="submit" class="btn btn-default">搜索</button>
+            </form>
+
+            <!-- 已登录用户    ↓ -->
+            <ul th:if="${session.account} !=null" class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+
+                        欢迎你 : [[${session.account.loginName}]] <span class="caret"></span> </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/account/profile">个人信息</a></li>
+                        <li><a href="#">收藏</a></li>
+                        <li><a href="#">设置</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="/account/logout">退出登录</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- 已登录用户   ↑ -->
+
+        </div><!-- /.navbar-collapse -->
+
+    </div><!-- /.container-fluid -->
+</nav>
+
+
+<!--  导航栏结束  			↑       -->
+
+
+
+<!--  列表       开始   ↓ -->
+<table class="table table-hover">
+    <tr>
+        <th>序号</th>
+        <th>工号</th>
+        <th>loginName</th>
+        <th>nickName</th>
+        <th>age</th>
+        <th>location</th>
+        <th>role</th>
+        <th>操作</th>
+    </tr>
+
+    <tr th:each="account : ${pageInfo.list}">
+        <td th:text="${accountStat.count}"></td>
+        <td th:text="${account.id}">工号</td>
+        <td th:text="${account.loginName}">loginName</td>
+        <td th:text="${account.nikeName}">nickName</td>
+        <td th:text="${account.age}">age</td>
+        <td th:text="${account.location}">location</td>
+        <td th:text="${account.role}">role</td>
+        <td>
+
+            <a class="btn btn-danger" th:href="@{'javascript:deleteById('+${account.id}+','+'&quot;'+${account.role}+'&quot;'+')' }"> 删除</a>
+
+            <a class="btn btn-warning" th:href="@{'javascript:updataInfo('+ ${account.id} + ');'}">编辑信息</a>
+        </td>
+
+
+    </tr>
+</table>
+<!--  列表       结束   ↑ -->
+
+
+<!-- 分页按钮 开始-->
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+
+        <li th:class="${pageInfo.isFirstPage} ? 'disabled' : '' ">
+
+            <a th:href="@{ ${pageInfo.isFirstPage} ? 'javascript:void(0)': '/account/list?pageNum=' + ${pageInfo.prePage}}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        <li th:each="pageNum : ${pageInfo.navigatepageNums}">
+            <a th:href="@{'/account/list?pageNum=' + ${pageNum}}">[[${pageNum}]]</a></li>
+        <li th:class="${pageInfo.isLastPage} ? 'disabled' : '' ">
+            <a th:href="@{ ${pageInfo.isLastPage} ? 'javascript:void(0)': '/account/list?pageNum=' + ${pageInfo.nextPage}}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+<!-- 分页按钮 结束-->
+
+<script type="text/javascript">
+    //删除用户账号函数
+    function deleteById(id, role) {
+        //提示用户是否删除
+        var isDel = confirm("是否删除");
+        if (isDel == false){
+            return ;
+        }
+        console.log(role);
+        console.log(id);
+        if (role == "admin" || role == "superAdmin"){
+            console.log("进入管理员");
+            if (sessionStorage.getItem("role") != "superAdmin"){
+                alert("你没有删除权限");
+                return ;
+            }
+        }
+
+        //删除可以用多种方式实现，比如我们通过连接的方式，访问controller的方法：window.location.href="/account/deletebyid"，但这样会导致页面跳转，也没人这样写
+
+        //通过ajax异步提交
+
+        var url = "/account/deleteById";
+        var args = {id:id};
+
+        $.post(url,args,function (data) {
+            if (data.code == 200){
+                //删除成功，刷新一下页面
+                window.location.reload();
+            }else if(data.code == 500){
+                alert(data.msg);
+            }
+        })
+    }
+
+    //修改profile函数
+    function updataInfo(id) {
+        console.log("进入profile函数");
+        url = "/account/valiprofile";
+        args = {id:id}
+        $.post(url,args,function (data) {
+                console.log(data);
+            }
+        )
+
+    }
+</script>
+</body>
+</html>
