@@ -1,0 +1,2 @@
+# MyfirstSpringBootProjet
+这是一个基于SpringMVC架构，SSM框架的一个简单的单节点项目，
